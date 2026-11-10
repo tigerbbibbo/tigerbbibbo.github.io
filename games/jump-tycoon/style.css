@@ -1,0 +1,1073 @@
+/* ==========================================================================
+   🎨 2D JUMP MAP TYCOON STYLESHEET
+   ========================================================================== */
+
+/* 1. Global Reset & Theme Variables */
+:root {
+    --bg-main: #0B0E14;
+    --bg-secondary: #131A26;
+    --bg-tertiary: #1E293B;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --accent-color: #6366F1; /* Indigo */
+    --accent-hover: #4F46E5;
+    --gold-color: #FBBF24;
+    --gold-hover: #F59E0B;
+    --success-color: #10B981;
+    --danger-color: #EF4444;
+    --danger-hover: #DC2626;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --neon-indigo: 0 0 10px rgba(99, 102, 241, 0.5);
+    --neon-gold: 0 0 15px rgba(251, 191, 36, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    overflow: hidden; /* Prevent body scrolls, handled internally */
+    width: 100vw;
+    height: 100vh;
+}
+
+#app {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* 2. Layout Structure */
+.main-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 12px;
+    gap: 12px;
+    position: relative;
+}
+
+/* Left Section: 2D Platformer */
+.game-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    justify-content: space-between;
+    box-shadow: var(--card-shadow);
+}
+
+/* Right Section: Tycoon Panel */
+.tycoon-section {
+    display: none; /* Hidden by default in active play */
+    flex: 1;
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    overflow: hidden; /* Scroll handled in panel content */
+    box-shadow: var(--card-shadow);
+}
+
+/* 3. Game Section Header & Canvas */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 12px 18px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.03);
+}
+
+.stage-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.stage-info .label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.stage-info .value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--accent-color);
+    text-shadow: var(--neon-indigo);
+}
+
+.currency-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: 1px solid rgba(251, 191, 36, 0.15);
+}
+
+.coin-icon {
+    width: 28px;
+    height: 28px;
+    animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+.gold-text {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--gold-color);
+    text-shadow: var(--neon-gold);
+}
+
+.gold-suffix {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold-color);
+    margin-right: 6px;
+}
+
+.gps-text {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.canvas-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    margin: 12px auto;
+    background-color: #030712;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    aspect-ratio: 2 / 1; /* Perfectly locks in the 1000x500 grid to prevent distortion */
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+}
+
+/* Fever Overlay */
+.fever-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(251, 191, 36, 0.08);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 50px rgba(251, 191, 36, 0.4);
+    animation: pulse-border 1.5s infinite alternate;
+}
+
+.fever-overlay.hidden {
+    display: none !important;
+}
+
+.fever-text {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--gold-color);
+    text-shadow: var(--neon-gold), 0 0 30px #000;
+    letter-spacing: 4px;
+    animation: shake 0.5s infinite alternate;
+}
+
+@keyframes pulse-border {
+    0% { box-shadow: inset 0 0 30px rgba(251, 191, 36, 0.3); }
+    100% { box-shadow: inset 0 0 60px rgba(251, 191, 36, 0.6); }
+}
+
+@keyframes shake {
+    0% { transform: translateY(-2px) scale(1); }
+    100% { transform: translateY(2px) scale(1.05); }
+}
+
+/* Game Footer Controls & Fever Bar */
+.game-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.fever-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.fever-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--gold-color);
+    letter-spacing: 1px;
+    min-width: 90px;
+}
+
+.fever-track {
+    flex-1: 1;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%;
+}
+
+.fever-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #F59E0B, #FBBF24, #FFFBEB);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+    transition: width 0.1s linear;
+}
+
+.fever-bar-container span {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--gold-color);
+    min-width: 35px;
+    text-align: right;
+}
+
+.controls-guide {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 6px;
+    border-radius: 8px;
+}
+
+.controls-guide strong {
+    color: var(--accent-color);
+}
+
+/* 4. Tycoon Navigation & Tabs */
+.tycoon-tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 700;
+    padding: 10px 4px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.tab-btn.active {
+    color: var(--text-primary);
+    background: var(--accent-color);
+    box-shadow: var(--neon-indigo);
+}
+
+.tab-content-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Custom Scrollbar for Right Panel */
+.tab-content-container::-webkit-scrollbar {
+    width: 6px;
+}
+.tab-content-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+.tab-content-container::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+}
+.tab-content-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Panel Header styling */
+.panel-header {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), transparent);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent-color);
+}
+
+.panel-header h2 {
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 2px;
+}
+
+.panel-header p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 5. General Card System */
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.card {
+    display: flex;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    padding: 12px;
+    gap: 12px;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    border-color: rgba(99, 102, 241, 0.2);
+    transform: translateX(2px);
+}
+
+.card-icon {
+    font-size: 1.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.card-info {
+    flex: 1;
+}
+
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.card-badge {
+    font-size: 0.7rem;
+    background: rgba(99, 102, 241, 0.2);
+    color: #A5B4FC;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+.card-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+/* Upgrade Progress in Cards */
+.card-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.card-progress-fill {
+    height: 100%;
+    background: var(--accent-color);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.card-stats-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.card-action-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-width: 90px;
+    text-align: center;
+}
+
+.card-action-btn:hover {
+    background: var(--accent-hover);
+}
+
+.card-action-btn:disabled {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-secondary) !important;
+    cursor: not-allowed;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* 6. Shop & Enchant Special Designs */
+.shop-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.shop-section h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.enchant-workshop {
+    margin-top: 24px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px dashed rgba(99, 102, 241, 0.3);
+}
+
+.enchant-workshop h3 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: #A5B4FC;
+}
+
+.enchant-ui {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.enchant-slot {
+    flex: 1;
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+}
+
+#enchant-item-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+#enchant-item-stats {
+    font-size: 0.75rem;
+    color: var(--success-color);
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.action-btn {
+    background: var(--gold-color);
+    color: #000;
+    border: none;
+    font-weight: 800;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: var(--gold-hover);
+    box-shadow: var(--neon-gold);
+}
+
+.action-btn:disabled {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.helper-text {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+/* 7. Stock Market Panel Styles */
+.stock-market-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stock-card {
+    display: flex;
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+    padding: 10px 14px;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: all 0.15s ease;
+}
+
+.stock-card.selected {
+    border-color: var(--accent-color);
+    background: linear-gradient(90deg, rgba(99,102,241,0.08), transparent);
+}
+
+.stock-main-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stock-ticker {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 800;
+}
+
+.stock-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.stock-price-info {
+    text-align: right;
+}
+
+.stock-price {
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.stock-change {
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.stock-change.up { color: var(--success-color); }
+.stock-change.down { color: var(--danger-color); }
+
+.stock-chart-container {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.stock-chart-container h3 {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+#stockChart {
+    width: 100%;
+    height: 120px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.chart-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    background: rgba(255,255,255,0.02);
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.chart-stats strong {
+    color: var(--text-primary);
+}
+
+.trade-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.trade-btn {
+    border: none;
+    font-weight: 800;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.trade-btn.buy { background: var(--success-color); color: #fff; }
+.trade-btn.sell { background: var(--danger-color); color: #fff; }
+.trade-btn.buy-all { background: #047857; color: #fff; }
+.trade-btn.sell-all { background: #B91C1C; color: #fff; }
+
+.trade-btn:disabled {
+    background: rgba(255,255,255,0.05) !important;
+    color: var(--text-secondary) !important;
+    cursor: not-allowed;
+}
+
+/* 8. Auction Board Styling */
+.auction-board {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.auction-timer-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.auction-timer-box span:first-child {
+    font-size: 0.8rem;
+    color: #FCA5A5;
+    font-weight: 700;
+}
+
+.time-countdown {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--danger-color);
+}
+
+.auction-item-detail {
+    display: flex;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 12px;
+    gap: 12px;
+    border: 1.5px solid var(--gold-color);
+    box-shadow: var(--neon-gold);
+}
+
+.auction-item-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    background: rgba(251, 191, 36, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.auction-item-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auction-item-info h3 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--gold-color);
+}
+
+.auction-item-info p {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.auction-bidding {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.bid-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.bid-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.bidder-name {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.bid-price {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--gold-color);
+}
+
+.bid-input-row .action-btn {
+    width: 100%;
+}
+
+.auction-log-box {
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 8px 12px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.auction-log-box h4 {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+#auction-logs {
+    list-style: none;
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--text-secondary);
+}
+
+#auction-logs li {
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+#auction-logs li span {
+    color: var(--gold-color);
+}
+
+/* 9. Ticker Footer Styling */
+.tycoon-footer {
+    margin-top: 12px;
+    background: #030712;
+    border-radius: 10px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+.news-ticker-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.news-tag {
+    font-size: 0.65rem;
+    font-weight: 900;
+    background: var(--danger-color);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.ticker-wrap {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+}
+
+.ticker-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: ticker 25s linear infinite;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+@keyframes ticker {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* 10. Toasts and notifications */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(19, 26, 38, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid var(--accent-color);
+    color: var(--text-primary);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    pointer-events: auto;
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1), fadeOut 0.3s 2.7s forwards;
+    min-width: 250px;
+}
+
+.toast.gold { border-left-color: var(--gold-color); }
+.toast.success { border-left-color: var(--success-color); }
+.toast.danger { border-left-color: var(--danger-color); }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(10px); }
+}
+
+/* --- ESC Menu, Options Menu & Start Screen (Single Screen Integration) --- */
+
+.tycoon-section.full-screen-menu {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    background-color: var(--bg-main);
+    border-radius: 0;
+    border: none;
+    padding: 24px;
+    box-shadow: none;
+    animation: fadeIn 0.25s ease-out;
+}
+
+.esc-menu-overlay, .options-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(3, 7, 18, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.esc-menu-overlay.hidden, .options-modal-overlay.hidden {
+    display: none !important;
+}
+
+.esc-menu-box, .options-box {
+    background: #0f172a;
+    border: 2px solid #6366f1;
+    border-radius: 20px;
+    padding: 30px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    text-align: center;
+    animation: scaleUpMenu 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleUpMenu {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.esc-menu-box h2, .options-box h2 {
+    color: #fff;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    font-weight: 900;
+}
+
+.esc-menu-box p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+}
+
+.esc-menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.esc-menu-btn {
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.esc-menu-btn.success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+.esc-menu-btn.primary {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+.esc-menu-btn.info {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+.esc-menu-btn.danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.esc-menu-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.options-close-btn {
+    transition: all 0.2s;
+}
+
+.options-close-btn:hover {
+    background: #475569 !important;
+}
+
+/* --- Start Screen --- */
+.start-screen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, #1e1b4b, #030712);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.start-screen-overlay.hidden {
+    display: none !important;
+}
+
+.start-screen-box {
+    text-align: center;
+    padding: 40px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 2px solid #6366f1;
+    border-radius: 24px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 0 50px rgba(99, 102, 241, 0.4);
+    animation: scaleUpMenu 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.start-btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.15);
+}

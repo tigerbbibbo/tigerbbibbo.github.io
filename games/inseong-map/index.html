@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인성맵 (Inseong Map) - 졸라맨의 모험</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <h1>인성맵 (Inseong Map)</h1>
+        <div id="ui-panel">
+            <span id="death-counter">사망 횟수: 0</span>
+            <button id="reset-btn" onclick="resetGame()">처음부터 다시</button>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="controls-info">
+            조작법: ← → (이동) | Space 또는 ↑ (점프) | R (리스폰)
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELORIA - 3D Web RPG</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for medieval feeling -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <!-- Start Screen Overlay -->
+    <div id="start-screen" class="overlay">
+        <div class="content">
+            <h1 class="game-title">ELORIA</h1>
+            <p class="game-subtitle">3D Fantasy RPG Web Prototype</p>
+            
+            <div class="instructions">
+                <h3>조작 방법 (Controls)</h3>
+                <ul>
+                    <li><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> - 이동 (Move)</li>
+                    <li><span class="key">Space</span> - 점프 (Jump)</li>
+                    <li><span class="key">Shift</span> - 달리기 (Sprint)</li>
+                    <li><span class="key">좌클릭 (L-Click)</span> - 칼 휘두르기 (Attack)</li>
+                    <li><span class="key">나무근처 좌클릭</span> - 벌목하기 및 원목 채집 (Chop Trees)</li>
+                    <li><span class="key">E</span> - 인벤토리 열기 / 닫기 (Toggle Inventory)</li>
+                    <li><span class="key">X</span> - 무기 넣기 / 꺼내기 (Sheathe / Draw)</li>
+                    <li><span class="key">P</span> - 1인칭 / 3인칭 시점 전환 (Toggle View)</li>
+                    <li><span class="key">클릭 (Click)</span> - 마우스 고정 / 해제 (Lock/Unlock)</li>
+                </ul>
+            </div>
+            
+            <button id="start-button" class="btn-start">게임 시작 (Start Game)</button>
+        </div>
+    </div>
+
+    <!-- Game HUD -->
+    <div id="hud" class="hud hidden">
+        <div class="hud-left">
+            <!-- Empty placeholder to keep center flexbox alignment for crosshair -->
+        </div>
+
+        <!-- Bottom-Center HUD: HP, MP, and Inventory Quickbar -->
+        <div class="character-info pointer-events-auto">
+            <span class="char-name">RIVERWOOD ADVENTURER</span>
+            <div class="bar-container">
+                <div class="bar hp" style="width: 100%;"></div>
+                <span class="bar-text">HP: 100 / 100</span>
+            </div>
+            <div class="bar-container">
+                <div class="bar mp" style="width: 100%;"></div>
+                <span class="bar-text">MP: 50 / 50</span>
+            </div>
+            <button id="hud-inventory-btn" class="hud-btn pointer-events-auto">인벤토리 열기 [E]</button>
+        </div>
+
+        <div class="hud-center">
+            <div class="crosshair">+</div>
+        </div>
+        <div class="hud-right">
+            <div class="quest-tracker">
+                <h4>퀘스트 (Quests)</h4>
+                <p>✔ 리버우드 탐색하기</p>
+                <p style="opacity: 0.6;">- 대장간 화로 구경하기</p>
+                <p style="opacity: 0.6;">- 소나무 숲과 안개 사이 걷기</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Interaction Prompt -->
+    <div id="interaction-prompt" class="interaction-prompt hidden">
+        <span class="prompt-key">우클릭</span> 대화하기
+    </div>
+
+    <!-- Dialogue UI Box -->
+    <div id="dialogue-box" class="dialogue-box hidden">
+        <div class="dialogue-header">
+            <span id="dialogue-npc-name" class="npc-name">NPC 이름</span>
+        </div>
+        <div class="dialogue-body">
+            <p id="dialogue-text" class="dialogue-text">대화 내용이 여기에 표시됩니다.</p>
+        </div>
+        <div class="dialogue-footer">
+            <span class="dialogue-hint">[클릭 또는 Space/Enter] 계속하기</span>
+        </div>
+    </div>
+
+    <!-- Classic Full-Screen Inventory Overlay -->
+    <div id="inventory-screen" class="inventory-screen hidden">
+        <div class="inventory-container">
+            <div class="inventory-header">
+                <h2>인벤토리 <span class="header-subtitle">INVENTORY</span></h2>
+                <button id="inventory-close-btn" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="inventory-layout">
+                <!-- Left Side: Dynamic Grid for 24 Slots -->
+                <div class="inventory-grid-container">
+                    <div class="inventory-grid" id="inventory-grid">
+                        <!-- Slots will be dynamically populated in main.js -->
+                    </div>
+                </div>
+                
+                <!-- Middle Side: Player Character Skin & Equipped Gear Slots (New) -->
+                <div class="inventory-char-preview-container">
+                    <h3>캐릭터 무장 <span class="panel-subtitle">CHARACTER EQUIPMENT</span></h3>
+                    <div class="char-preview-layout">
+                        <!-- Equipment Slots: Left Column (Head, Chest, Boots) -->
+                        <div class="equipment-column">
+                            <div class="equip-slot" id="equip-head" data-slot="head">
+                                <div class="equip-slot-icon">🪖</div>
+                                <div class="equip-slot-label">머리 (Helmet)</div>
+                            </div>
+                            <div class="equip-slot" id="equip-chest" data-slot="chest">
+                                <div class="equip-slot-icon">👕</div>
+                                <div class="equip-slot-label">갑옷 (Chest)</div>
+                            </div>
+                            <div class="equip-slot" id="equip-boots" data-slot="boots">
+                                <div class="equip-slot-icon">🥾</div>
+                                <div class="equip-slot-label">장화 (Boots)</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Center: 3D Player Character Preview Canvas -->
+                        <div class="char-3d-preview-box">
+                            <canvas id="char-preview-canvas"></canvas>
+                        </div>
+                        
+                        <!-- Equipment Slots: Right Column (Weapon, Shield) -->
+                        <div class="equipment-column">
+                            <div class="equip-slot" id="equip-weapon" data-slot="weapon">
+                                <div class="equip-slot-icon">⚔️</div>
+                                <div class="equip-slot-label">무기 (Weapon)</div>
+                            </div>
+                            <div class="equip-slot" id="equip-shield" data-slot="shield">
+                                <div class="equip-slot-icon">🛡️</div>
+                                <div class="equip-slot-label">방패 (Shield)</div>
+                            </div>
+                            <!-- Ring / Accessory slot for visual completeness (locked) -->
+                            <div class="equip-slot disabled" style="opacity: 0.35; cursor: not-allowed;" title="잠김">
+                                <div class="equip-slot-icon">💍</div>
+                                <div class="equip-slot-label">장신구</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Side: Player Stats & Item Details -->
+                <div class="inventory-sidebar">
+                    <!-- Player Status Summary -->
+                    <div class="player-stats-panel">
+                        <h3>모험가 정보 <span class="panel-subtitle">CHARACTER STATS</span></h3>
+                        <div class="stat-row">
+                            <span class="stat-label">공격력 (ATK):</span>
+                            <span id="stat-atk" class="stat-value">10</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">방어력 (DEF):</span>
+                            <span id="stat-def" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">체력 (HP):</span>
+                            <span id="stat-hp" class="stat-value">100 / 100</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">마나 (MP):</span>
+                            <span id="stat-mp" class="stat-value">50 / 50</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">인벤토리 공간:</span>
+                            <span id="stat-slots" class="stat-value">0 / 24</span>
+                        </div>
+                        <!-- Developer Option to Respawn All Items -->
+                        <button id="respawn-items-btn" class="btn-respawn">필드 아이템 재소환 (Respawn)</button>
+                    </div>
+                    
+                    <!-- Item Detail Viewer -->
+                    <div class="item-detail-panel" id="item-detail-panel">
+                        <div class="detail-empty" id="detail-empty">
+                            <p>아이템을 선택하면</p>
+                            <p class="sub">상세 정보가 여기에 표시됩니다.</p>
+                        </div>
+                        <div class="detail-content hidden" id="detail-content">
+                            <div class="detail-header">
+                                <div class="detail-icon" id="detail-icon"></div>
+                                <div class="detail-title-group">
+                                    <h4 class="detail-name" id="detail-name">아이템 이름</h4>
+                                    <span class="detail-type" id="detail-type">아이템 종류</span>
+                                </div>
+                            </div>
+                            <p class="detail-description" id="detail-description">아이템의 설명과 효과가 여기에 나타납니다.</p>
+                            <div class="detail-actions">
+                                <button id="use-item-btn" class="btn-action btn-use">사용 / 장착</button>
+                                <button id="discard-item-btn" class="btn-action btn-discard">버리기 (Drop)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

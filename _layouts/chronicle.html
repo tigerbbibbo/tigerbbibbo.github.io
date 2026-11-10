@@ -10,14 +10,13 @@
 <body id="top">
   <a class="skip-link" href="#main">본문으로 바로가기</a>
   <header class="masthead">
-    <a class="brand" href="#top"><span aria-hidden="true">✦</span> {{ site.title | escape }}</a>
-    {% if page.chapters %}
-    <nav aria-label="기록장 목차">
+    <a class="brand" href="{{ '/' | relative_url }}"><span aria-hidden="true">✦</span> {{ site.title | escape }}</a>
+    <nav aria-label="주 메뉴">
       {% for chapter in page.chapters %}
       <a href="#{{ chapter.id | escape }}">{{ chapter.title | escape }}</a>
       {% endfor %}
+      <a href="{{ '/games/' | relative_url }}"{% if page.url == '/games/' %} aria-current="page"{% endif %}>게임</a>
     </nav>
-    {% endif %}
   </header>
   <main class="journal" id="main">
     <div class="paper" aria-hidden="true"></div>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D 점프맵 타이쿤 (Jump Map Tycoon)</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- 메인 컨테이너 (좌우 분할) -->
+        <main class="main-container">
+            
+            <!-- 왼쪽: 게임 화면 및 플레이어 정보 -->
+            <section class="game-section">
+                <header class="game-header">
+                    <div class="stage-badge">
+                        <span class="label">STAGE</span>
+                        <span id="stage-num" class="value">1</span>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center; margin-left: auto;">
+                        <!-- 글로벌 크레딧(CR) 배지 -->
+                        <div id="credit-container" class="currency-container" style="background: rgba(14, 165, 233, 0.15); border: 1px solid #0284c7; box-shadow: 0 0 8px rgba(14, 165, 233, 0.3); gap: 4px; padding: 6px 12px;">
+                            <span style="font-size: 1.1rem; filter: drop-shadow(0 0 4px #0ea5e9);">💎</span>
+                            <span id="credit-amount" class="gold-text" style="color: #38bdf8; text-shadow: 0 0 6px #0ea5e9; font-size: 1.3rem;">0</span>
+                            <span class="gold-suffix" style="color: #38bdf8; font-size: 0.8rem; font-weight: bold; margin-right: 0;">CR</span>
+                        </div>
+                        <div class="currency-container" style="padding: 6px 12px;">
+                            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FFD700'><circle cx='12' cy='12' r='10'/><text x='12' y='16' font-family='sans-serif' font-weight='bold' font-size='12' text-anchor='middle' fill='%23B8860B'>$</text></svg>" class="coin-icon" alt="Gold">
+                            <span id="gold-amount" class="gold-text" style="font-size: 1.3rem;">0</span>
+                            <span class="gold-suffix" style="font-size: 0.9rem;">G</span>
+                            <span id="gps-display" class="gps-text" style="font-size: 0.8rem;">(+0 G/s)</span>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- 게임 캔버스 영역 (시아 확장을 위해 가로폭을 1000으로 증가) -->
+                <div class="canvas-wrapper">
+                    <canvas id="gameCanvas" width="1000" height="500"></canvas>
+                    
+                    <!-- 피버 타임 안내 레이어 -->
+                    <div id="fever-overlay" class="fever-overlay hidden">
+                        <div class="fever-text">🔥 FEVER TIME 🔥</div>
+                    </div>
+                </div>
+
+                <!-- 조작 안내 및 피버 게이지 -->
+                <footer class="game-footer">
+                    <div class="fever-bar-container">
+                        <div class="fever-label">FEVER GAUGE</div>
+                        <div class="fever-track">
+                            <div id="fever-fill" class="fever-fill" style="width: 0%;"></div>
+                        </div>
+                        <span id="fever-percent">0%</span>
+                    </div>
+                    <div class="controls-guide">
+                        <span><strong>A / D</strong> 좌우 이동</span>
+                        <span>|</span>
+                        <span><strong>SPACE</strong> 점프 (더블 점프 / 벽타기 가능)</span>
+                        <span>|</span>
+                        <span><strong>R</strong> 스테이지 재시작</span>
+                    </div>
+                </footer>
+            </section>
+
+            <!-- 오른쪽: 타이쿤 제어 및 업그레이드 패널 -->
+            <section class="tycoon-section">
+                <!-- 탭 메뉴 버튼 -->
+                <nav class="tycoon-tabs">
+                    <button class="tab-btn active" data-tab="alba-panel">💼 알바 채용</button>
+                    <button class="tab-btn" data-tab="shop-panel">🛒 상점/인챈트</button>
+                    <button class="tab-btn" data-tab="stock-panel">📈 주식 시장</button>
+                    <button class="tab-btn" data-tab="auction-panel">🔨 암시장 경매</button>
+                    <button class="tab-btn close-menu-btn" id="close-menu-btn" style="background: #ef4444; color: white; font-weight: bold; margin-left: auto; border-radius: 8px;">❌ 닫기</button>
+                </nav>
+
+                <!-- 탭 내용 영역 -->
+                <div class="tab-content-container">
+                    
+                    <!-- 1. 알바 채용 패널 -->
+                    <div id="alba-panel" class="tab-panel active">
+                        <div class="panel-header">
+                            <h2>💼 알바 자동화 시스템</h2>
+                            <p>알바를 고용하여 내가 직접 뛰지 않아도 골드를 자동으로 획득하세요!</p>
+                        </div>
+                        <div class="card-list" id="alba-list">
+                            <!-- JS에서 동적 렌더링 -->
+                        </div>
+                    </div>
+
+                    <!-- 2. 상점 및 인챈트 패널 -->
+                    <div id="shop-panel" class="tab-panel">
+                        <div class="panel-header">
+                            <h2>🛒 장비 구입 & 인챈트</h2>
+                            <p>나의 조작 성능을 올리는 장비를 구매하고 추가 옵션을 인챈트하세요!</p>
+                        </div>
+                        
+                        <div class="shop-grid">
+                            <!-- 장비 섹션 -->
+                            <div class="shop-section">
+                                <h3>👟 영구 장비</h3>
+                                <div class="card-list" id="equipment-list">
+                                    <!-- JS에서 동적 렌더링 -->
+                                </div>
+                            </div>
+
+                            <!-- 소모성 비약 섹션 -->
+                            <div class="shop-section">
+                                <h3>🧪 마법 비약</h3>
+                                <div class="card-list" id="potion-list">
+                                    <!-- JS에서 동적 렌더링 -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 인챈트 워크숍 -->
+                        <div class="enchant-workshop">
+                            <h3>✨ 인챈트 워크숍</h3>
+                            <div class="enchant-ui">
+                                <div class="enchant-slot">
+                                    <span id="enchant-item-name">선택된 장비 없음</span>
+                                    <span id="enchant-item-stats">효과 없음</span>
+                                </div>
+                                <button id="enchant-btn" class="action-btn" disabled>인챈트 시도 (5,000 G)</button>
+                            </div>
+                            <p class="helper-text">* 인챈트 시 임의의 강력한 접미 옵션이 장비에 무작위로 부여됩니다!</p>
+                        </div>
+                    </div>
+
+                    <!-- 3. 주식 시장 패널 -->
+                    <div id="stock-panel" class="tab-panel">
+                        <div class="panel-header">
+                            <h2>📈 점프 주식 시장 (JSE)</h2>
+                            <p>실시간으로 변하는 호재 기사에 맞춰 주식을 거래하여 목돈을 만들어보세요!</p>
+                        </div>
+                        <div class="stock-market-layout">
+                            <!-- 주식 종목 리스트 -->
+                            <div class="stock-list" id="stock-list">
+                                <!-- JS 동적 생성 -->
+                            </div>
+                            <!-- 실시간 차트 영역 -->
+                            <div class="stock-chart-container">
+                                <h3 id="chart-title">선택된 주식: 가시산업 (SPIKE)</h3>
+                                <canvas id="stockChart" width="350" height="150"></canvas>
+                                <div class="chart-stats">
+                                    <span>보유량: <strong id="owned-shares">0</strong> 주</span>
+                                    <span>평가액: <strong id="stock-value">0</strong> G</span>
+                                </div>
+                                <div class="trade-controls">
+                                    <button id="buy-stock-btn" class="trade-btn buy" disabled>매수 (1주)</button>
+                                    <button id="sell-stock-btn" class="trade-btn sell" disabled>매도 (1주)</button>
+                                    <button id="buy-all-stock-btn" class="trade-btn buy-all" disabled>전량 매수</button>
+                                    <button id="sell-all-stock-btn" class="trade-btn sell-all" disabled>전량 매도</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 암시장 경매 패널 -->
+                    <div id="auction-panel" class="tab-panel">
+                        <div class="panel-header">
+                            <h2>🔨 지하 경매소</h2>
+                            <p>정기적으로 올라오는 전설급 매물을 두고 다른 NPC 대리인들과 비딩 경쟁을 하세요!</p>
+                        </div>
+                        <div class="auction-board">
+                            <div class="auction-timer-box">
+                                <span>다음 경매 마감까지</span>
+                                <span id="auction-timer" class="time-countdown">00:45</span>
+                            </div>
+                            <div class="auction-item-detail">
+                                <div class="auction-item-icon">⭐</div>
+                                <div class="auction-item-info">
+                                    <h3 id="auction-item-name">전설 알바 [고인물 킹-커]</h3>
+                                    <p id="auction-item-desc">주기 2초 | 정산액 +100,000G | 절대 낙사 안 함</p>
+                                </div>
+                            </div>
+                            <div class="auction-bidding">
+                                <div class="bid-info">
+                                    <div class="bid-row">
+                                        <span>현재 최고 입찰자:</span>
+                                        <span id="highest-bidder" class="bidder-name">NPC_철수</span>
+                                    </div>
+                                    <div class="bid-row">
+                                        <span>현재 최고가:</span>
+                                        <span id="highest-bid-price" class="bid-price">15,000 G</span>
+                                    </div>
+                                </div>
+                                <div class="bid-input-row">
+                                    <button id="place-bid-btn" class="action-btn">입찰하기 (+10% 상향)</button>
+                                </div>
+                            </div>
+                            <div class="auction-log-box">
+                                <h4>경매 실시간 중계 기록</h4>
+                                <ul id="auction-logs">
+                                    <!-- 실시간 비딩 로그 -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 하단 주식 & 게임 소식 뉴스 티커 -->
+                <footer class="tycoon-footer">
+                    <div class="news-ticker-container">
+                        <span class="news-tag">NEWS</span>
+                        <div class="ticker-wrap">
+                            <div id="news-ticker" class="ticker-content">
+                                [특보] 점프 연합 노동 위원회, 알바 최저 생산 단가 인상 논의 예정... 가시산업 주가 소폭 상승세 기록 중...
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </section>
+
+        </main>
+    </div>
+    
+    <!-- 오디오 플레이어 등을 위한 자리 또는 알림 모달 -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- ESC 일시정지 메뉴 overlay -->
+    <div id="esc-menu-overlay" class="esc-menu-overlay hidden">
+        <div class="esc-menu-box">
+            <h2>⏸️ 게임 일시정지됨</h2>
+            <p>진행 상황이 자동으로 기록됩니다.</p>
+            <div class="esc-menu-buttons">
+                <button id="esc-btn-continue" class="esc-menu-btn success">▶️ 계속하기</button>
+                <button id="esc-btn-menu" class="esc-menu-btn primary">💼 타이쿤 메뉴 (전체화면)</button>
+                <button id="esc-btn-options" class="esc-menu-btn info">⚙️ 옵션</button>
+                <button id="esc-btn-exit" class="esc-menu-btn danger">💾 저장하고 나가기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 옵션 모달 overlay -->
+    <div id="options-modal-overlay" class="options-modal-overlay hidden">
+        <div class="options-box">
+            <h2>⚙️ 게임 옵션</h2>
+            <div class="option-item" style="text-align: left; margin-bottom: 16px;">
+                <label style="display: block; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">🎵 효과음 소리 크기</label>
+                <input type="range" id="sound-volume-slider" min="0" max="100" value="70" style="width: 100%; accent-color: #6366f1;">
+            </div>
+            <div class="option-item" style="text-align: left; margin-bottom: 16px;">
+                <label style="display: block; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">🖥️ 화면 밝기</label>
+                <input type="range" id="brightness-slider" min="50" max="150" value="100" style="width: 100%; accent-color: #6366f1;">
+            </div>
+            <div class="option-item" style="text-align: left; margin-bottom: 16px;">
+                <label style="display: block; color: #94a3b8; font-weight: 700; margin-bottom: 8px;">🎮 조작 가이드</label>
+                <div style="background: #1e293b; padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
+                    <p style="margin: 4px 0;"><strong>A / D (또는 ← / →)</strong> : 좌우 이동</p>
+                    <p style="margin: 4px 0;"><strong>SPACE</strong> : 점프 및 벽 뛰어넘기 / 벽타기 / 비행</p>
+                    <p style="margin: 4px 0;"><strong>R</strong> : 스테이지 재시작</p>
+                    <p style="margin: 4px 0;"><strong>ESC</strong> : 게임 일시정지 및 메뉴 열기</p>
+                </div>
+            </div>
+            <div class="options-footer" style="margin-top: 24px;">
+                <button id="options-btn-close" class="options-close-btn" style="background: #334155; color: white; padding: 10px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700;">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 시작 화면 overlay -->
+    <div id="start-screen-overlay" class="start-screen-overlay">
+        <div class="start-screen-box" style="max-width: 550px;">
+            <!-- 1. 메인 메뉴 화면 -->
+            <div id="start-main-menu">
+                <div class="logo-area">
+                    <h1 style="font-size: 2.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 25px rgba(99, 102, 241, 0.7); margin-bottom: 4px;">🏃‍♂️ 2D 점프맵 타이쿤</h1>
+                    <h3 style="font-size: 1.1rem; color: #818cf8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px;">Jump Map Tycoon</h3>
+                </div>
+                <div class="global-record-info" style="color: #cbd5e1; font-size: 0.95rem; margin-bottom: 24px; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px; display: flex; justify-content: space-around;">
+                    <span>🏆 최고 기록: <strong id="global-high-record" style="color: #f59e0b;">STAGE 1</strong></span>
+                    <span style="color: rgba(255,255,255,0.2)">|</span>
+                    <span>💎 전체 크레딧: <strong id="global-credits-display" style="color: #38bdf8;">0 CR</strong></span>
+                </div>
+                <div class="start-buttons" style="display: flex; flex-direction: column; gap: 14px;">
+                    <button id="menu-btn-single" class="start-btn success" style="padding: 15px; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; color: #fff; cursor: pointer;">👤 싱글 플레이 (기록 보관소)</button>
+                    <button id="menu-btn-multi" class="start-btn primary" style="padding: 15px; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; color: #fff; cursor: pointer;">👥 멀티 플레이 (AI 동료 대결)</button>
+                </div>
+            </div>
+
+            <!-- 2. 싱글 플레이 기록 관리 화면 -->
+            <div id="start-single-menu" class="hidden" style="display: none;">
+                <h2 style="color: #fff; font-size: 1.4rem; font-weight: 800; margin-bottom: 15px;">💾 싱글 플레이 저장 기록 목록</h2>
+                <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 16px; line-height: 1.4;">이전 기록을 골라 이어서 플레이하거나, 빈 슬롯에 새로운 기록을 파서 시작할 수 있습니다. 각 기록별 골드는 공유되지 않습니다.</p>
+                <div id="slot-list-container" class="slot-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; text-align: left;">
+                    <!-- 슬롯 3개가 JS에서 동적으로 그려집니다 -->
+                </div>
+                <button id="single-back-btn" class="options-close-btn" style="background: #475569; width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 700; color: white; cursor: pointer;">◀ 메인으로 돌아가기</button>
+            </div>
+
+            <!-- 3. 멀티 플레이 대기실 화면 -->
+            <div id="start-multi-menu" class="hidden" style="display: none;">
+                <h2 style="color: #fff; font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;">🎮 멀티 플레이 (AI 팀전 매칭)</h2>
+                <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 12px;">보유한 크레딧으로 강력한 AI 팀원을 영입하고 함께 스테이지를 극복하세요!</p>
+                
+                <!-- 도전 과제 안내 배너 -->
+                <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); padding: 12px; border-radius: 10px; margin-bottom: 16px; font-size: 0.82rem; color: #fbbf24; text-align: left; line-height: 1.4; box-shadow: 0 0 10px rgba(245,158,11,0.15);">
+                    🏆 <strong>협동 생존 챌린지:</strong> AI 팀원(최대 3명)과 함께 <strong>STAGE 10</strong>을 무사히 클리어하여 11단계에 도달하면 메가 보너스 <strong>1,200 CR 💎</strong>을 계정에 즉시 추가 지급합니다!
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left;">
+                    <h4 style="color: #cbd5e1; margin-bottom: 12px; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">🤖 영입 가능한 AI 동료 (최대 3명까지 자유롭게 선택 가능)</h4>
+                    <div id="multi-ai-roster" style="display: flex; flex-direction: column; gap: 10px; max-height: 220px; overflow-y: auto; padding-right: 4px;">
+                        <!-- JS에서 AI 동료 카드들을 동적으로 그려줍니다 (잠금/잠금해제/선택 상태) -->
+                    </div>
+                </div>
+
+                <div class="multi-buttons" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                    <button id="multi-start-ai-btn" class="start-btn success" style="padding: 14px; font-size: 1rem; cursor: pointer; border: none; font-weight: bold; border-radius: 10px;">🚀 AI 팀 매치 시작하기</button>
+                    <button id="multi-match-real-btn" class="start-btn info" style="padding: 14px; font-size: 1rem; cursor: pointer; border: none; font-weight: bold; border-radius: 10px;">👥 실시간 유저 대기열 진입</button>
+                </div>
+                <button id="multi-back-btn" class="options-close-btn" style="background: #475569; width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 700; color: white; cursor: pointer;">◀ 메인으로 돌아가기</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

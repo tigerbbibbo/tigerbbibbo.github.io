@@ -210,3 +210,35 @@ h2 { font-size: clamp(1.65rem, 3vw, 2.2rem); letter-spacing: -.045em; }
   .routes { background-size: auto, cover; background-image: linear-gradient(#f1d7a0dd, #f1d7a0f5), url("catalan.jpg"); }
   .paper::before, .paper::after { width: 24%; }
 }
+
+
+.game-intro { margin-bottom: 1.5rem; }
+.game-intro > a { display: inline-block; margin-bottom: 1rem; }
+.game-intro h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+.game-intro p:last-child { margin-bottom: 0; }
+.game-library .routes-list { margin-top: .75rem; }
+.masthead nav a[aria-current="page"] { text-decoration: underline; }
+
+.word-chain form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .8rem;
+}
+
+.word-chain input {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.word-chain :is(input, select, .game-reset) {
+  padding: .5rem;
+  border: 1px solid #96623d;
+  background: #fff2ce;
+  color: inherit;
+  font: inherit;
+}
+
+.word-chain #word-turn { margin-top: 1rem; }
+.word-chain button { cursor: pointer; font: inherit; }
