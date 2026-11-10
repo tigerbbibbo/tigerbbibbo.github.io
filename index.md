@@ -2,8 +2,23 @@
 layout: default
 ---
 
-## 안녕하세요
+## 이서준
 
-tigerbbibbo의 개인 사이트입니다. 이곳에 프로젝트와 개발 기록을 모아둘 예정입니다.
+**성별** · 남
 
-[GitHub 프로필 보기](https://github.com/tigerbbibbo)
+### 업적
+
+- 순아신회 숭배 대상
+- 순아신회 창조
+
+### 수상 내역
+
+- 바이올린 특별상
+- 2025 고려대 수학대회 최우수상
+- 2025 고려대 영어 스피치 대회 대상
+
+### 링크
+
+- [순아신회 웹사이트](https://pureamphibian.qshop.ai/)
+- [유튜브 채널](https://www.youtube.com/channel/UCh-674zvvnMM4YqSoWb95yA)
+- [GitHub 프로필](https://github.com/tigerbbibbo)
