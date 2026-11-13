@@ -49,10 +49,9 @@ chapters:
   <div>
     <p class="overline">CHAPTER II</p>
     <h2 id="links-title">탐험 경로</h2>
-    <p class="routes-subtitle">관련 웹사이트와 채널</p>
+    <p class="routes-subtitle">관련 링크</p>
   </div>
   <ul class="routes-list">
-    <li><a href="https://www.youtube.com/channel/UCh-674zvvnMM4YqSoWb95yA">유튜브 채널 <span aria-hidden="true">↗</span></a></li>
     <li><a href="https://github.com/tigerbbibbo">GitHub 프로필 <span aria-hidden="true">↗</span></a></li>
   </ul>
 </section>
