@@ -53,5 +53,6 @@ chapters:
   </div>
   <ul class="routes-list">
     <li><a href="https://github.com/tigerbbibbo">GitHub 프로필 <span aria-hidden="true">↗</span></a></li>
+    <li><a href="https://blog.naver.com/tg_sj">네이버 블로그 <span aria-hidden="true">↗</span></a></li>
   </ul>
 </section>
