@@ -1,12 +1,10 @@
 ---
 layout: chronicle
 title: 이서준의 모험 기록장
-description: 이서준의 자기소개와 업적, 수상 내역을 담은 중세풍 모험 기록장.
+description: 이서준의 자기소개와 수상 내역을 담은 중세풍 모험 기록장.
 chapters:
   - id: profile
     title: 인물
-  - id: achievements
-    title: 업적
   - id: awards
     title: 수상
   - id: links
@@ -22,7 +20,7 @@ chapters:
       <dt>성별</dt>
       <dd>남</dd>
     </dl>
-    <a class="hero-link" href="#achievements">기록 펼치기 <span aria-hidden="true">↓</span></a>
+    <a class="hero-link" href="#awards">기록 펼치기 <span aria-hidden="true">↓</span></a>
   </div>
   <figure class="atlas">
     <div class="atlas-frame">
@@ -35,17 +33,9 @@ chapters:
 
 <div class="rule" aria-hidden="true">✦</div>
 
-<div class="records">
-  <section class="chapter" id="achievements" aria-labelledby="achievements-title">
-    <p class="overline">CHAPTER I</p>
-    <h2 id="achievements-title">업적</h2>
-    <ul class="entries">
-      <li>순아신회 숭배 대상</li>
-      <li>순아신회 창조</li>
-    </ul>
-  </section>
+<div>
   <section class="chapter" id="awards" aria-labelledby="awards-title">
-    <p class="overline">CHAPTER II</p>
+    <p class="overline">CHAPTER I</p>
     <h2 id="awards-title">수상 내역</h2>
     <ul class="entries">
       <li>바이올린 특별상</li>
@@ -57,12 +47,11 @@ chapters:
 
 <section class="routes" id="links" aria-labelledby="links-title">
   <div>
-    <p class="overline">CHAPTER III</p>
+    <p class="overline">CHAPTER II</p>
     <h2 id="links-title">탐험 경로</h2>
     <p class="routes-subtitle">관련 웹사이트와 채널</p>
   </div>
   <ul class="routes-list">
-    <li><a href="https://pureamphibian.qshop.ai/">순아신회 웹사이트 <span aria-hidden="true">↗</span></a></li>
     <li><a href="https://www.youtube.com/channel/UCh-674zvvnMM4YqSoWb95yA">유튜브 채널 <span aria-hidden="true">↗</span></a></li>
     <li><a href="https://github.com/tigerbbibbo">GitHub 프로필 <span aria-hidden="true">↗</span></a></li>
   </ul>
